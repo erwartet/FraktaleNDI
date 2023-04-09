@@ -9,11 +9,14 @@ public class IgelInt extends Igel {
     }
 
     public void vor(double laenge) {
-        int dx = (int) x + (int) (laenge * Math.sin(b));
-        int dy = (int) y - (int) (laenge * Math.cos(b));
         Graphics stift = canvas.getGraphics();
         stift.setColor(new Color(1.0f, 0.3435f, 0.0f));
+
+        int dx = (int) x + (int) (laenge * Math.sin(b));
+        int dy = (int) y - (int) (laenge * Math.cos(b));
         stift.drawLine((int) x, (int) y, dx, dy);
+
+
         x = dx;
         y = dy;
 
