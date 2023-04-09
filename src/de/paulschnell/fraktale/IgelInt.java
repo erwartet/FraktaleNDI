@@ -8,12 +8,19 @@ public class IgelInt extends Igel {
         super(canvas);
     }
 
-    public void vor(int laenge) {
-        int dx = x + (int) (laenge * Math.sin(b));
-        int dy = y - (int) (laenge * Math.cos(b));
+    public void vor(double laenge) {
+        int dx = (int) x + (int) (laenge * Math.sin(b));
+        int dy = (int) y - (int) (laenge * Math.cos(b));
         Graphics stift = canvas.getGraphics();
-        stift.drawLine(x, y, dx, dy);
+        stift.setColor(new Color(1.0f, 0.3435f, 0.0f));
+        stift.drawLine((int) x, (int) y, dx, dy);
         x = dx;
         y = dy;
+
+        try {
+            Thread.sleep(v);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

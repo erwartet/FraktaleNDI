@@ -8,14 +8,18 @@ public class Zeichenfenster extends JFrame {
 
     private final Canvas canvas;
     private final JPanel contentPane;
-    private final JCheckBox chbxWiederhohlt;
+    private final Choice chAuswahl;
     private final JCheckBox chbxGenauerIgel;
     private final JSlider sliderGeschwindigkeit;
     private final JSlider sliderTiefe;
-    private final JLabel lblTiefeZahl;
+    private JLabel lblTiefeZahl = null;
+    private JTextField tfWinkel;
 
     private Igel igel;
     private Fraktale fraktale;
+
+    private int tiefe = 100;
+    private int geschwindigkeit = 0;
 
     /**
      * Create the frame.
@@ -23,7 +27,7 @@ public class Zeichenfenster extends JFrame {
     public Zeichenfenster() {
         setTitle("Fraktale");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 820, 582);
+        setBounds(100, 100, 1306, 774);
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPane);
@@ -31,40 +35,36 @@ public class Zeichenfenster extends JFrame {
 
         canvas = new Canvas();
         canvas.setBackground(Color.WHITE);
-        canvas.setBounds(10, 10, 523, 523);
+        canvas.setBounds(10, 10, 992, 720);
         contentPane.add(canvas);
 
-        chbxWiederhohlt = new JCheckBox("Wiederhohlt");
-        chbxWiederhohlt.setBounds(539, 374, 113, 35);
-        contentPane.add(chbxWiederhohlt);
-
-        Choice chAuswahl = new Choice();
+        chAuswahl = new Choice();
         chAuswahl.add("Koch Flocke");
+        chAuswahl.add("Koch");
         chAuswahl.add("Sirpinski Dreieck");
         chAuswahl.add("Pythagoras Baum");
-        chAuswahl.setBounds(539, 10, 255, 202);
+        chAuswahl.setBounds(1020, 10, 255, 202);
         contentPane.add(chAuswahl);
 
         Button btnStart = new Button("Start");
         btnStart.addActionListener(e -> {
-            fraktale = new Fraktale(igel);
             switch (chAuswahl.getSelectedIndex()) {
-                case 0:
-                    fraktale.kochFlocke(30);
-                    break;
-                case 1:
-                    fraktale.sierpinski(100);
-                    break;
-                case 2:
-                    fraktale.pythagoras(120, 30);
-                    break;
-                default:
-                    break;
+                case 0 -> fraktale.kochFlocke(tiefe * 3 / 2);
+                case 1 -> {
+                    igel.rechts(90);
+                    fraktale.koch(tiefe * 2);
+                }
+                case 2 -> fraktale.sierpinski(500, tiefe * 4 + 1);
+                case 3 -> {
+                    igel.setX((double) (canvas.getWidth() / 2));
+                    int winkel = Integer.parseInt(tfWinkel.getText());
+                    fraktale.pythagoras(tiefe, winkel);
+                }
             }
         });
         btnStart.setForeground(new Color(255, 255, 255));
         btnStart.setBackground(new Color(0, 100, 0));
-        btnStart.setBounds(539, 415, 255, 56);
+        btnStart.setBounds(1020, 612, 255, 56);
         contentPane.add(btnStart);
 
         Button btnLoeschen = new Button("Löschen");
@@ -75,47 +75,69 @@ public class Zeichenfenster extends JFrame {
         });
         btnLoeschen.setForeground(new Color(255, 255, 255));
         btnLoeschen.setBackground(new Color(139, 0, 0));
-        btnLoeschen.setBounds(539, 477, 255, 56);
+        btnLoeschen.setBounds(1020, 674, 255, 56);
         contentPane.add(btnLoeschen);
 
         chbxGenauerIgel = new JCheckBox("Genauer Igel");
+        chbxGenauerIgel.setSelected(true);
         chbxGenauerIgel.addActionListener(e -> {
             if (chbxGenauerIgel.isSelected()) {
-
+                igel = new IgelDouble(canvas);
             } else {
                 igel = new IgelInt(canvas);
             }
             resetIgel();
         });
-        chbxGenauerIgel.setBounds(539, 336, 113, 35);
+        chbxGenauerIgel.setBounds(1025, 571, 113, 35);
         contentPane.add(chbxGenauerIgel);
 
         sliderGeschwindigkeit = new JSlider();
+        sliderGeschwindigkeit.addChangeListener(e -> {
+            geschwindigkeit = (100 - sliderGeschwindigkeit.getValue()) * 2;
+        });
         sliderGeschwindigkeit.setValue(100);
-        sliderGeschwindigkeit.setBounds(539, 303, 255, 26);
+        sliderGeschwindigkeit.setMaximum(100);
+        sliderGeschwindigkeit.setBounds(1025, 538, 255, 26);
         contentPane.add(sliderGeschwindigkeit);
 
         JLabel lblGeschwindigkeit = new JLabel("Geschwindigkeit");
         lblGeschwindigkeit.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        lblGeschwindigkeit.setBounds(539, 287, 142, 20);
+        lblGeschwindigkeit.setBounds(1025, 522, 142, 20);
         contentPane.add(lblGeschwindigkeit);
 
+        lblTiefeZahl = new JLabel("100");
+        lblTiefeZahl.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        lblTiefeZahl.setBounds(1229, 440, 46, 19);
+        lblTiefeZahl.setHorizontalAlignment(SwingConstants.RIGHT);
+        contentPane.add(lblTiefeZahl);
+
         sliderTiefe = new JSlider();
+        sliderTiefe.addChangeListener(e -> {
+            tiefe = sliderTiefe.getValue();
+            lblTiefeZahl.setText(Integer.toString(tiefe));
+        });
         sliderTiefe.setValue(100);
-        sliderTiefe.setBounds(539, 225, 255, 26);
+        sliderTiefe.setMaximum(100);
+        sliderTiefe.setBounds(1025, 460, 255, 26);
         contentPane.add(sliderTiefe);
 
         JLabel lblTiefe = new JLabel("Tiefe");
         lblTiefe.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        lblTiefe.setBounds(541, 209, 142, 20);
+        lblTiefe.setBounds(1027, 444, 142, 20);
         contentPane.add(lblTiefe);
 
-        lblTiefeZahl = new JLabel("100");
-        lblTiefeZahl.setFont(new Font("Tahoma", Font.PLAIN, 16));
-        lblTiefeZahl.setBounds(747, 205, 47, 26);
-        contentPane.add(lblTiefeZahl);
+        tfWinkel = new JTextField("35");
+        tfWinkel.setBounds(1081, 389, 86, 20);
+        contentPane.add(tfWinkel);
+        tfWinkel.setColumns(10);
 
-        igel = new IgelInt(canvas);
+        JLabel lblWinkel = new JLabel("Winkel:");
+        lblWinkel.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        lblWinkel.setBounds(1025, 387, 142, 20);
+        contentPane.add(lblWinkel);
+
+        fraktale = new Fraktale();
+        igel = new IgelDouble(canvas);
         resetIgel();
     }
 
@@ -123,23 +145,23 @@ public class Zeichenfenster extends JFrame {
      * Launch the application.
      */
     public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    Zeichenfenster frame = new Zeichenfenster();
-                    frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        EventQueue.invokeLater(() -> {
+            try {
+                Zeichenfenster frame = new Zeichenfenster();
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
 
     public void resetIgel() {
-        igel.setX(canvas.getWidth() / 4);
+        igel.setX(canvas.getWidth() / 3);
         igel.setY(canvas.getHeight() - canvas.getHeight() / 4);
         igel.setPhi(0);
         igel.setB(0);
+        igel.setV(geschwindigkeit);
+        fraktale.setIgel(igel);
     }
 
 }
